@@ -49,3 +49,42 @@ Or pass the "-output" parameter to have it output to the console instead of goin
 # Start-Countdown
 A silly little function that counts down seconds on the console with a little color for flair. Add it in to a script loop that you want to stall for a bit and it gives you something to look at.
 
+# Convert To/From Garbage Functions
+This started off as an exercise to see how easy it would be to obfuscate a bunch of text, possibly code, to bypass detection from host based antivirus.  I was playing around with just converting text in to its Unicode character number representation and then deliminating it with random text and that worked pretty well. Then I thought it might be a little too obvious looking that the numbers represented Unicode characters so I decided to multiply each one by a high prime digit.  
+All said and done I'm not sure if this is considered encoding or encryption, but suffice to say without having these functions available (to see the prime number) it would likely take a very long time to reverse this.
+
+## ConvertTo-Garbage
+You can either type a string you want to convert, or you can pipe something to this function.
+```
+PS$> ConvertTo-Garbage "hack the planet"
+819208fc764069$q:'779823PD!<>E842839HRleb<jz252064xrJo913732bPx819208H795577X/QE252064l>J$sk882224=;"GNL850716RHGKb;tmN764069HRleb<jz866470G/LTY+X795577fc913732i$jI)!
+
+PS$> $ENV:Username | ConvertTo-Garbage
+527759%E&@P;w874347#SyT$>V:*921609?K897978/MXKsZ#h913732Ond866470tv;YM795577?K953117mp:j252064t!UQ519882'AzQy+*874347BMj!787700TIm"795577wop"j(uMb913732lzfIY=913732'AzQy+*
+```
+## ConvertFrom-Garbage
+The companion function to the ConvertTo-Garbage function that reverses the process to turn "garbage" back in to a human readable string.
+
+```
+PS$> $text = @'
+819208fc764069$q:'779823PD!<>E842839HRleb<jz252064xrJo913732bPx819208H795577X/QE252064l>J$sk882224=;"GNL850716RHGKb;tmN764069HRleb<jz866470G/LTY+X795577fc913732i$jI)!
+'@
+PS$> ConvertFrom-Garbage $text
+hack the planet
+
+
+PS$> $text = @'
+527759%E&@P;w874347#SyT$>V:*921609?K897978/MXKsZ#h913732Ond866470tv;YM795577?K953117mp:j252064t!UQ519882'AzQy+*874347BMj!787700TIm"795577wop"j(uMb913732lzfIY=913732'AzQy+*
+'@
+PS$> ConvertFrom-Garbage $text
+Courtney Bodett
+```
+The use of "here-strings" (@'  '@) is required on the "garbage" as it employs special characters that Powershell will try to interpret instead of taking it as a string value.
+
+I'm often using these functions when storing sensitive data in property values, sometimes even before exporting to CSV. This means I'm usually able to call the garbage text by its property name like
+```Powershell
+PS$> $CSV = Import-Csv c:\temp\data.csv
+PS$> $CSV[0].Password | ConvertFrom-Garbage
+Super Secret Password
+```
+These are fairly hacky functions and I know there's more error handling that could be put in.  Take them at face value.
