@@ -31,6 +31,21 @@ Shows a table of all active connections, the owning process, and running user
 A simple modification of the Start-Sleep cmdlet to allow sleeping an action until a desired time. AKA without having to do math.
 
 ```Powershell
-Sleep-Until 8:00pm; Shutdown /a
+PS$> Sleep-Until 8:00pm; Shutdown /a
 ```
+
+# ConvertTo-SarcasmFont
+This is a silly function I wrote in the middle of an awful meeting to make a coworker laugh.
+
+```Powershell
+PS$> ConvertTo-SarcasmFont "I'm really interested in what you have to say"
+```
+Now it's on your clipboard, paste and enjoy
+```
+i'm rEaLlY InTeReStEd iN WhAt yOu hAvE To sAy
+```
+Or pass the "-output" parameter to have it output to the console instead of going to the clipboard.
+
+# Start-Countdown
+A silly little function that counts down seconds on the console with a little color for flair. Add it in to a script loop that you want to stall for a bit and it gives you something to look at.
 
