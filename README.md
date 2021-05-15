@@ -27,4 +27,10 @@ Shows a table of all active connections, the owning process, and running user
     0.0.0.0           9395 0.0.0.0                0      Listen Veeam.EndPoint.Service NT AUTHORITY\SYSTEM
     127.0.0.1         9395 127.0.0.1          49719 Established Veeam.EndPoint.Service NT AUTHORITY\SYSTEM
 ```
+# Start-SleepUntil
+A simple modification of the Start-Sleep cmdlet to allow sleeping an action until a desired time. AKA without having to do math.
+
+```Powershell
+Sleep-Until 8:00pm; Shutdown /a
+```
 
