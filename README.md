@@ -87,4 +87,18 @@ PS$> $CSV = Import-Csv c:\temp\data.csv
 PS$> $CSV[0].Password | ConvertFrom-Garbage
 Super Secret Password
 ```
-These are fairly hacky functions and I know there's more error handling that could be put in.  Take them at face value.
+These are fairly hacky functions and I know there's more error handling that could be put in.  Take them at face value.  
+  
+# Get-ComputerUpTime  
+Only tested in one Active Directory environment and a personal machine.  Function returns the current, or remote, computer's uptime as well as some other information.  
+  
+```  
+PS$> Get-ComputerUpTime  
+  
+Computer    : Win10-05ERJJ4
+Windows     : Microsoft Windows 10 Pro
+Version     : 10.0.19044
+LastBoot    : 6/30/2022 2:11:13 PM
+Uptime      : 00D:04H:56M:20S
+InstallDate : 3/6/2021 8:00:56 PM  
+```  
