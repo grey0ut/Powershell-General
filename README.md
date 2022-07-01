@@ -89,7 +89,7 @@ Super Secret Password
 ```
 These are fairly hacky functions and I know there's more error handling that could be put in.  Take them at face value.  
   
-# Get-ComputerUpTime  
+## Get-ComputerUpTime  
 Only tested in one Active Directory environment and a personal machine.  Function returns the current, or remote, computer's uptime as well as some other information.  
   
 ```  
