@@ -1,14 +1,14 @@
 # Powershell-General
 A collection of general purpose Powershell code with no particular theme.
 
-# Show-SecureString
+## Show-SecureString
 A quick function to convert a SecureString object in to plaintext
 ```Powershell
     PS$> $securestring = Read-Host -Prompt "type some text" -AsSecureString
     PS$> Show-SecureString $securestring
     secrettext
 ```
-# Get-Connections
+## Get-Connections
 Shows a table of all active connections, the owning process, and running user
 ```Powershell
     PS$> Get-Connections
@@ -27,14 +27,14 @@ Shows a table of all active connections, the owning process, and running user
     0.0.0.0           9395 0.0.0.0                0      Listen Veeam.EndPoint.Service NT AUTHORITY\SYSTEM
     127.0.0.1         9395 127.0.0.1          49719 Established Veeam.EndPoint.Service NT AUTHORITY\SYSTEM
 ```
-# Start-SleepUntil
+## Start-SleepUntil
 A simple modification of the Start-Sleep cmdlet to allow sleeping an action until a desired time. AKA without having to do math.
 
 ```Powershell
 PS$> Sleep-Until 8:00pm; Shutdown /a
 ```
 
-# ConvertTo-SarcasmFont
+## ConvertTo-SarcasmFont
 This is a silly function I wrote in the middle of an awful meeting to make a coworker laugh.
 
 ```Powershell
@@ -46,10 +46,10 @@ i'm rEaLlY InTeReStEd iN WhAt yOu hAvE To sAy
 ```
 Or pass the "-output" parameter to have it output to the console instead of going to the clipboard.
 
-# Start-Countdown
+## Start-Countdown
 A silly little function that counts down seconds on the console with a little color for flair. Add it in to a script loop that you want to stall for a bit and it gives you something to look at.
 
-# Convert To/From Garbage Functions
+## Convert To/From Garbage Functions
 This started off as an exercise to see how easy it would be to obfuscate a bunch of text, possibly code, to bypass detection from host based antivirus.  I was playing around with just converting text in to its Unicode character number representation and then deliminating it with random text and that worked pretty well. Then I thought it might be a little too obvious looking that the numbers represented Unicode characters so I decided to multiply each one by a high prime digit.  
 All said and done I'm not sure if this is considered encoding or encryption, but suffice to say without having these functions available (to see the prime number) it would likely take a very long time to reverse this.
 
@@ -87,4 +87,18 @@ PS$> $CSV = Import-Csv c:\temp\data.csv
 PS$> $CSV[0].Password | ConvertFrom-Garbage
 Super Secret Password
 ```
-These are fairly hacky functions and I know there's more error handling that could be put in.  Take them at face value.
+These are fairly hacky functions and I know there's more error handling that could be put in.  Take them at face value.  
+  
+## Get-ComputerUpTime  
+Only tested in one Active Directory environment and a personal machine.  Function returns the current, or remote, computer's uptime as well as some other information.  
+  
+```  
+PS$> Get-ComputerUpTime  
+  
+Computer    : Win10-05ERJJ4
+Windows     : Microsoft Windows 10 Pro
+Version     : 10.0.19044
+LastBoot    : 6/30/2022 2:11:13 PM
+Uptime      : 00D:04H:56M:20S
+InstallDate : 3/6/2021 8:00:56 PM  
+```  
