@@ -55,7 +55,7 @@ All said and done I'm not sure if this is considered encoding or encryption, but
 
 ## ConvertTo-Garbage
 You can either type a string you want to convert, or you can pipe something to this function.
-```
+```Powershell  
 PS$> ConvertTo-Garbage "hack the planet"
 819208fc764069$q:'779823PD!<>E842839HRleb<jz252064xrJo913732bPx819208H795577X/QE252064l>J$sk882224=;"GNL850716RHGKb;tmN764069HRleb<jz866470G/LTY+X795577fc913732i$jI)!
 
@@ -65,7 +65,7 @@ PS$> $ENV:Username | ConvertTo-Garbage
 ## ConvertFrom-Garbage
 The companion function to the ConvertTo-Garbage function that reverses the process to turn "garbage" back in to a human readable string.
 
-```
+```Powershell  
 PS$> $text = @'
 819208fc764069$q:'779823PD!<>E842839HRleb<jz252064xrJo913732bPx819208H795577X/QE252064l>J$sk882224=;"GNL850716RHGKb;tmN764069HRleb<jz866470G/LTY+X795577fc913732i$jI)!
 '@
@@ -82,7 +82,7 @@ Courtney Bodett
 The use of "here-strings" (@'  '@) is required on the "garbage" as it employs special characters that Powershell will try to interpret instead of taking it as a string value.
 
 I'm often using these functions when storing sensitive data in property values, sometimes even before exporting to CSV. This means I'm usually able to call the garbage text by its property name like
-```Powershell
+```Powershell  
 PS$> $CSV = Import-Csv c:\temp\data.csv
 PS$> $CSV[0].Password | ConvertFrom-Garbage
 Super Secret Password
@@ -92,7 +92,7 @@ These are fairly hacky functions and I know there's more error handling that cou
 ## Get-ComputerUpTime  
 Only tested in one Active Directory environment and a personal machine.  Function returns the current, or remote, computer's uptime as well as some other information.  
   
-```  
+```Powershell  
 PS$> Get-ComputerUpTime  
   
 Computer    : Win10-05ERJJ4
@@ -101,4 +101,30 @@ Version     : 10.0.19044
 LastBoot    : 6/30/2022 2:11:13 PM
 Uptime      : 00D:04H:56M:20S
 InstallDate : 3/6/2021 8:00:56 PM  
+```  
+  
+## Invoke-Quser  
+A Powershell wrapper for quser to provide object output.  
+  
+```Powershell
+PS$> Invoke-Quser  
+  
+ComputerName : Localhost
+Username     : John Doe
+SessionID    : 1
+SessionName  : console
+State        : Active
+IdleTime     : none
+LogonTime    : 7/7/2022 9:03:00 AM  
+  
+PS$> Invoke-Quser -ComputerName ContosoPC1  
+  
+ComputerName : ContosoPC1
+Username     : CerealKiller
+SessionID    : 2
+SessionName  : rdp-tcp#90
+State        : Active
+IdleTime     : none
+LogonTime    : 7/6/2022 9:03:00 PM  
+  
 ```  
