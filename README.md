@@ -128,3 +128,20 @@ IdleTime     : none
 LogonTime    : 7/6/2022 9:03:00 PM  
   
 ```  
+## Get-GeoLocation  
+A function wrapper for the .NET GeoCoordinateWatcher class.  Returns GPS coordinates derived from the Location Services of the computer.  
+Remote computer inspection leverages Invoke-Command and requires WinRM to be working. 
+```Powershell
+PS$> Get-GeoLocation 
+  
+Computer Location               NetAdapter
+-------- --------               ----------
+Gibson   37.232885, -115.806122 Ethernet 2 
+  
+PS$> Get-GeoLocation  -ComputerName ContosoPC1  
+  
+Computer   Location               NetAdapter
+--------   --------               ----------
+ContosoPC1 38.871138, -77.057071  Wi-Fi
+  
+```  
