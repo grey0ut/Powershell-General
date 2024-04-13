@@ -7,7 +7,7 @@ Function ConvertFrom-Base64 {
     .Parameter TextString
     The Base64 string. Can come from the pipeline.
     .Parameter Encoding
-    Default encoding is UTF8, but this can be Unicode or UTF8 if you're having problems.
+    Default encoding is UTF8, but this can be Unicode,ASCII or UTF8 if you're having problems.
     .Parameter OutputType
     Select whether to return the decoded value as a string or a byte array
     .NOTES
@@ -21,7 +21,7 @@ Function ConvertFrom-Base64 {
         [Parameter(ValueFromPipeline = $true, Position = 0, Mandatory = $true)]
         [String]$TextString,
         [Parameter(Position = 1)]
-        [ValidateSet('UTF8','Unicode')]
+        [ValidateSet('UTF8','Unicode','ASCII')]
         [String]$Encoding = 'UTF8',
         [Parameter(Position = 2)]
         [ValidateSet('Bytes','String')]
