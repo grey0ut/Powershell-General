@@ -17,22 +17,10 @@ Function Invoke-Quser {
     State       : Active
     LogonTime   : 2/17/2022 8:27:00 AM
     .Notes
-    Version:        1.0
+    Version:        1.4
     Author:         C. Bodett
-    Creation Date:  2/8/2022
-    Purpose/Change: Initial function development
-    Version:        1.1
-    Author:         C. Bodett
-    Creation Date:  2/17/2022
-    Purpose/Change: Added the "State" property
-    Version:        1.2
-    Author:         C. Bodett
-    Creation Date:  4/4/2022
-    Purpose/Change: Changed the logon date array index to start from the end.
-    Version:        1.3
-    Author:         C. Bodett
-    Creation Date:  5/11/2022
-    Purpose/Change: Changed the split method on the user info row to be more like github.com/UNT-CAS/QuserObject implementation. Borrowed a lot of their methodology from that module and used it here.
+    Creation Date:  1/8/2025
+    Purpose/Change: Updated error handling to support multiple error messages from quser
     #>
     [cmdletbinding()]
     Param (
@@ -53,12 +41,11 @@ Function Invoke-Quser {
     try {
         $Results = (Invoke-Expression $Quser) 2>&1
     } catch {
-        $Results = $Error[0].Exception.Message
+        $Results = $_.Exception.Message
     }
 
     if ($LASTEXITCODE -eq 0) {
         $QUserOutput = Foreach ($Result in ($Results | Select-Object -Skip 1)) {
-                        #$ParsedLine = $Result.Split(" ",[System.StringSplitOptions]::RemoveEmptyEntries)
                         $ParsedLine = $Result -split '\s{2,}'
                         [System.Collections.Generic.List[String]]$SessionInfo = $ParsedLine | Select-Object -Skip 1
                         if ($SessionInfo.Count -eq 4) {
@@ -66,15 +53,14 @@ Function Invoke-Quser {
                             $SessionInfo.Insert(0,'')
                         }
                         $IdleTime = if ($SessionInfo[3] -eq "none" -or $SessionInfo[3] -eq '.') {
-                            "none"
-                        } else {
-                            If ($SessionInfo[3] -as [Int]) {
-                                $SessionInfo[3] = "0:$($SessionInfo[3])"
+                                "none"
+                            } else {
+                                If ($SessionInfo[3] -as [Int]) {
+                                    $SessionInfo[3] = "0:$($SessionInfo[3])"
+                                }
+                                [Timespan]$QuserIdle = $SessionInfo[3].Replace('+','.')
+                                $QuserIdle
                             }
-                            [Timespan]$QuserIdle = $SessionInfo[3].Replace('+','.')
-                            #(Get-Date).Subtract($QuserIdle)
-                            $QuserIdle
-                        }
                         $UserInfo = [PSCustomObject]@{
                             ComputerName = $ComputerName
                             Username = $ParsedLine[0].TrimStart('>').Trim()
@@ -88,6 +74,10 @@ Function Invoke-Quser {
                     }
         return $QUserOutput
     } else {
-        Write-Host $Results.Exception.message -ForegroundColor Red
+        foreach ($ResultError in $Results.Exception.Message) {
+            if ($ResultError -ne '') {
+                Write-Warning $ResultError
+            }
+        }
     }
 }
