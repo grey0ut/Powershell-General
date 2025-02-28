@@ -1,4 +1,4 @@
-Function Get-ComputerUpTime {
+function Get-ComputerUpTime {
     <#
     .Synopsis
     Returns the computer's uptime, lastboot datestamp and install datestamp
@@ -33,14 +33,10 @@ Function Get-ComputerUpTime {
     Specifying a computer name will run the function against a remote computer.  
 
     .NOTES
-    Version:        1.0
+    Version:        1.2
     Author:         C. Bodett
-    Creation Date:  6/30/2022
-    Purpose/Change: Initial function development
-    Version:        1.1
-    Author:         C. Bodett
-    Creation Date:  6/30/2022
-    Purpose/Change: Added in support for multiple computernames through the pipeline and credentials
+    Creation Date:  9/26/2022
+    Purpose/Change: Added in support for if the WinRM service isn't running on a remote computer
     #>
     [Cmdletbinding(DefaultParameterSetName="none")]
     Param (
@@ -55,27 +51,27 @@ Function Get-ComputerUpTime {
             ClassName = "Win32_OperatingSystem"
             Property = @("InstallDate","LastBootupTime","Caption","Version","CSName")
         }
+        $CimSessionOption = New-CimSessionOption -Protocol Dcom
     }
 
     Process {
-        $CimSessionArgs = @{}
+        $CimSessionArgs = @{
+            SessionOption = $CimSessionOption
+        }
+        Write-Verbose "Protocol dcom"
         Write-Verbose $ComputerName
+
         if ($ComputerName -and ($ComputerName.ToLower() -ne ([Net.Dns]::GetHostName()).ToLower())) {
-            $CimSessionOption = New-CimSessionOption -Protocol wsman
-            Write-Verbose "Protocol wsman"
-            [Void]$CimSessionArgs.Add('SessionOption',$CimSessionOption)
-            [Void]$CimSessionArgs.Add('ComputerName',$ComputerName)
-        } else {
-            $CimSessionOption = New-CimSessionOption -Protocol Dcom
-            Write-Verbose "Protocol dcom"
-            [Void]$CimSessionArgs.Add('SessionOption',$CimSessionOption)
+            $CimSessionArgs.Add('ComputerName',$ComputerName)
         }
 
         if ($Credential) {
             [Void]$CimSessionArgs.Add('Credential',$Credential)
         }
-
         Try {
+            if ($c -eq 2) {
+                Write-Verbose "Trying to connect to $ComputerName via CIM one last time."
+            }
             $CimSession = New-CimSession @CimSessionArgs -ErrorAction Stop
             $OSInfo = Get-CimInstance @CimInstanceArgs -CimSession $CimSession -ErrorAction Stop
             [PSCustomObject]@{
@@ -89,7 +85,7 @@ Function Get-ComputerUpTime {
         } Catch [Microsoft.Management.Infrastructure.CimException] {
             Write-Warning "WinRM not reachable on $ComputerName"
         } Catch {
-            Write-Error $Error[0]
+            Write-Error $_
         }
 
         Try {
