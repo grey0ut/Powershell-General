@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+  <ViewDefinitions>
+    <View>
+      <Name>GetConnection</Name>
+      <ViewSelectedBy>
+        <TypeName>GetConnection</TypeName>
+      </ViewSelectedBy>
+      <TableControl>
+        <TableHeaders>
+            <TableColumnHeader>
+                <Label>LocalAddress</Label>
+            </TableColumnHeader>
+            <TableColumnHeader>
+                <Label>LocalPort</Label>
+            </TableColumnHeader>
+            <TableColumnHeader>
+                <Label>RemoteAddress</Label>
+            </TableColumnHeader>
+            <TableColumnHeader>
+                <Label>RemotePort</Label>
+            </TableColumnHeader>
+            <TableColumnHeader>
+                <Label>State</Label>
+            </TableColumnHeader>
+            <TableColumnHeader>
+                <Label>Process</Label>
+            </TableColumnHeader>
+            <TableColumnHeader>
+                <Label>User</Label>
+            </TableColumnHeader>
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <TableColumnItems>
+            <TableColumnItem>
+                <PropertyName>LocalAddress</PropertyName>
+            </TableColumnItem>
+            <TableColumnItem>
+                <PropertyName>LocalPort</PropertyName>
+            </TableColumnItem>
+            <TableColumnItem>
+                <PropertyName>RemoteAddress</PropertyName>
+            </TableColumnItem>
+            <TableColumnItem>
+                <PropertyName>RemotePort</PropertyName>
+            </TableColumnItem>
+            <TableColumnItem>
+                <PropertyName>State</PropertyName>
+            </TableColumnItem>
+            <TableColumnItem>
+                <PropertyName>Process</PropertyName>
+            </TableColumnItem>
+            <TableColumnItem>
+                <ScriptBlock>
+                  $Esc = [char]27
+                  $Color = if ($_.User -match 'NT AUTHORITY') {
+                        "37"
+                    } else {
+                        "96"
+                    }
+                  "$($Esc)[$($color)m$($_.User)$($Esc)[39m"    
+                </ScriptBlock>
+            </TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
+  </ViewDefinitions>
+</Configuration>

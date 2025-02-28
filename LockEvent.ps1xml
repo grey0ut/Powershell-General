@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+  <ViewDefinitions>
+    <View>
+      <Name>LockEvent</Name>
+      <ViewSelectedBy>
+        <TypeName>LockEvent</TypeName>
+      </ViewSelectedBy>
+      <TableControl>
+        <TableHeaders>
+            <TableColumnHeader>
+                <Label>DateTime</Label>
+            </TableColumnHeader>
+             <TableColumnHeader>
+                <Label>EventID</Label>
+            </TableColumnHeader>
+            <TableColumnHeader>
+                <Label>EventType</Label>
+            </TableColumnHeader>
+            <TableColumnHeader>
+                <Label>TargetUserName</Label>
+            </TableColumnHeader>
+            <TableColumnHeader>
+                <Label>TargetDomainName</Label>
+            </TableColumnHeader>
+             <TableColumnHeader>
+                <Label>SessionId</Label>
+            </TableColumnHeader>
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <TableColumnItems>
+            <TableColumnItem>
+                <PropertyName>DateTime</PropertyName>
+            </TableColumnItem>
+            <TableColumnItem>
+                <PropertyName>EventID</PropertyName>
+            </TableColumnItem>
+            <TableColumnItem>
+                <ScriptBlock>
+                    $Esc = [char]27
+                    $Color = if ($_.EventType -eq 'Locked') {
+                        "91"
+                    } else {
+                        "96"
+                    }
+                    "$($Esc)[$($color)m$($_.EventType)$($Esc)[39m"    
+                </ScriptBlock>
+            </TableColumnItem>
+            <TableColumnItem>
+                <PropertyName>TargetUserName</PropertyName>
+            </TableColumnItem>
+            <TableColumnItem>
+                <PropertyName>TargetDomainName</PropertyName>
+            </TableColumnItem>
+            <TableColumnItem>
+                <PropertyName>SessionId</PropertyName>
+            </TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
+  </ViewDefinitions>
+</Configuration>
