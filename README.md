@@ -120,4 +120,8 @@ function for testing a provided password against the HaveIBeenPwned API to test 
 a simple wrapper for Test-NetConnection to simplify use and output
   
 ## Test-HostsFile  
-function for testing a Windows' Hosts file to see if it's been altered from its default state.
+function for testing a Windows' Hosts file to see if it's been altered from its default state.  
+
+## Get-ASRRules.ps1  
+script for returning a human readable version of the machine's current Defender ASR rule state
+
