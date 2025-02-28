@@ -1,29 +1,35 @@
-Function Show-SecureString {
+function Show-SecureString {
     <#
-    .SYNOPSIS
-    A quick function to convert a SecureString object in to plaintext
-    .DESCRIPTION
-    This function takes a SecureString as input and converts it back to plain text so it can be read. 
-    .PARAMETER String
-    The SecureString you would like descrypted back in to a plain text string
-    .EXAMPLE
-    PS$> $securestring = Read-Host -Prompt "type some text" -AsSecureString
-    PS$> Show-SecureString $securestring
-    secrettext
+    .Synopsis
+    Converts a SecureString object in to readable plain text
+    .Description
+    Uses the built-in .NET methods to convert a securestring object back in to readable plaintext
+    .Example
+    $test = get-credential contoso\admin
+
+    Show-SecureString $test.password
     .NOTES
-        Version:    1.0
-        Author:     C. Bodett
-        Creation Date: 3/6/2020
+    Version:        1.1
+    Author:         C. Bodett
+    Creation Date:  5/5/2022
+    Purpose/Change: Reformatted help. Added object cast for parameter and try/catch block for process. Restructured Process/End block to accomodate pipline input of multiple objects.
     #>
-    [CmdletBinding()]
+    [cmdletbinding()]
     param(
-        [parameter(Position=0,HelpMessage="Enter a SecureString",
-        ValueFromPipeline,ValueFromPipelineByPropertyName)]
-        [ValidateNotNull()]$String
+        [Parameter(Position=0,HelpMessage="Must provide a SecureString object",ValueFromPipeline)]
+        [ValidateNotNull()]
+        [System.Security.SecureString]$StringObj
         )
-    Begin {}    
-    Process {
-    [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($String))
+    process {
+        try {
+            $BSTR = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($StringObj)
+            $PlainText = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($BSTR)
+            $PlainText
+        } catch {
+            throw $_
+        }
     }
-    End {}
+    end {
+        [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($BSTR)
+    }
 } 
