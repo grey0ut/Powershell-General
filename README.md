@@ -118,3 +118,6 @@ function for testing a provided password against the HaveIBeenPwned API to test 
   
 ## Test-Port  
 a simple wrapper for Test-NetConnection to simplify use and output
+  
+## Test-HostsFile  
+function for testing a Windows' Hosts file to see if it's been altered from its default state.
