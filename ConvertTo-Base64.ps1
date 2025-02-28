@@ -1,4 +1,4 @@
-Function ConvertTo-Base64{
+function ConvertTo-Base64{
     <#
     .Synopsis
     Converts a plaintext string in to Base64.
@@ -6,36 +6,31 @@ Function ConvertTo-Base64{
     Takes a plaintext string as a parameter, either directly or from the pipeline, and converts it in to Base64.
     .Parameter TextString
     The plaintext string. Can come from the pipeline.
-    .Parameter Bytes
-    Bytes to be directly converted to Base64
     .Parameter Encoding
-    Default encoding is UTF8, but this can be Unicode, ASCII or UTF8 if you're having problems.
+    Default encoding is UTF8
     .NOTES
-    Version:        1.0
+    Version:        1.5
     Author:         C. Bodett
-    Creation Date:  9/14/2021
-    Purpose/Change: Initial function development.
+    Creation Date:  4/16/2024
+    Purpose/Change: fixed to actually support pipeline input and array input
     #>
     [cmdletbinding()]
-    Param (
-        [Parameter(ValueFromPipeline = $true, Position = 0, Mandatory = $false)]
-        [ValidateNotNullOrEmpty()]
-        [String]$TextString,
-        [Parameter(ValueFromPipeline = $false, Position = 0, Mandatory = $false)]
-        [ValidateNotNullOrEmpty()]
-        [Byte[]]$Bytes,
-        [Parameter(Position = 1)]
+    param(
+        [Parameter(ValueFromPipeline=$true,Position=0,Mandatory=$true)]
+        [String[]]$Textstring,
+        [Parameter(Position=1)]
         [ValidateSet('UTF8','Unicode','ASCII')]
-        [String]$Encoding = 'UTF8'
+        [string]$Encoding = 'UTF8'
     )
 
-    Switch ($PSBoundParameters.Keys) {
-        'TextString' {
-            $Encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::$Encoding.GetBytes($TextString))
-        }
-        'Bytes' {
-            $Encoded = [System.Convert]::ToBase64String($Bytes)
+    Process {
+        Foreach ($String in $TextString) {
+            try {
+                [System.Convert]::ToBase64String([System.Text.Encoding]::$Encoding.GetBytes($String))
+            } catch {
+                Write-Error $_
+            }
         }
     }
-    $Encoded
+
 }
