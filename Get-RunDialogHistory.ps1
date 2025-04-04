@@ -56,17 +56,19 @@ function Get-RunDialogHistory {
         $RunMRUPath = Join-Path -Path $RegRoot -ChildPath $($SID + "\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU")
         if (Test-Path $RunMRUPath) {
             $Reg = Get-ItemProperty -Path $RunMRUPath
-            $MruOrder = $Reg.MRUList.ToCharArray()
-            $Order = 0
-            foreach ($Entry in $MruOrder) {
-                $Data = $Reg.$Entry
-                [PSCustomObject]@{
-                    User = $UserName
-                    Order = $Order
-                    Name = $Entry
-                    Execution = $Data
+            if ($null -ne $Reg) {
+                $MruOrder = $Reg.MRUList.ToCharArray()
+                $Order = 0
+                foreach ($Entry in $MruOrder) {
+                    $Data = $Reg.$Entry
+                    [PSCustomObject]@{
+                        User = $UserName
+                        Order = $Order
+                        Name = $Entry
+                        Execution = $Data
+                    }
+                    $Order++
                 }
-                $Order++
             }
         } else {
             Write-Warning "No Explorer History for $UserName"
