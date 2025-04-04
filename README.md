@@ -88,6 +88,35 @@ PS> Update-FormatData 'C:\Path\To\GetConnection.ps1xml'
 ## Get-LockEvent  
 Retrieve logs from Windows Events pertaining to computer lock and unlock.  Accompanying LockEvent.ps1xml file can be used to pretty up the PSObject output.  
 
+## Get-PatchTuesday  
+a simple function to return a datetime object representing Microsoft's Patch Tuesday.  If ran with no arguments it will return the current month's Patch Tuesday date.  The -Month parameter excepts month names and will return a Patch Tuesday date for that month.  
+Beyond specifically returning Patch Tuesday dates you can also request a date time object for other things like the 2nd Wednesday of a given month.  
+```Powershell
+# assuming it's currently April 2025 at 12:51pm
+PS> Get-PatchTuesday
+
+Tuesday, April 8, 2025 12:51:05 PM
+PS> Get-PatchTuesday -Month May
+
+Tuesday, May 13, 2025 12:51:28 PM
+PS> Get-PatchTuesday -Month May -WeekDay Wednesday -FindNthDay 2
+
+Wednesday, May 14, 2025 12:52:24 PM
+```  
+  
+## Get-RunDialogHistory  
+Another function for parsing the registry. This inspects users RunMRU registry key an returns a list of in-order execution history.
+```Powershell
+PS> Get-RunDialogHistory  
+
+User        Order Name Execution
+----        ----- ---- ---------
+Contoso\J.Smith     0    a runas /user:dev\J.Smith mmc.exe\1
+Contoso\J.Smith     1    v services.msc\1
+Contoso\J.Smith     2    u ms-settings:privacy-location\1
+Contoso\J.Smith     3    t runas /netonly /user:J.Smith@dev.res mmc\1
+Contoso\J.Smith     4    f mmc\1
+```
 ## Get-ComputerUpTime  
 Only tested in one Active Directory environment and a personal machine.  Function returns the current, or remote, computer's uptime as well as some other information.  
   
