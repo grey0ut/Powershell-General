@@ -4,17 +4,66 @@ A collection of general purpose Powershell code with no particular theme.
 ## ConvertTo/From-Base64  
 Simple functions for converting Base64 back and forth
 
+## ConvertTo-SarcasmFont
+This is a silly function I wrote in the middle of an awful meeting to make a coworker laugh.
+
+```Powershell
+PS> ConvertTo-SarcasmFont "I'm really interested in what you have to say"
+```
+Now it's on your clipboard, paste and enjoy
+```
+i'm rEaLlY InTeReStEd iN WhAt yOu hAvE To sAy
+```
+Or pass the "-output" parameter to have it output to the console instead of going to the clipboard.
+
+## Get-AppExecHistory  
+Retrieves entries from the UserAssist registry key containing information about GUI-Based application executions.  
+```Powershell
+PS> Get-AppExecHistory  
+    User           : Contoso\J.Smith
+    ExecutionType  : Direct
+    ItemName       : C:\Program Files\F5 VPN\f5fpclientW.exe
+    RunCount       : 0
+    LastRun        :
+
+    User           : Contoso\J.Smith
+    ExecutionType  : Direct
+    ItemName       : C:\WINDOWS\system32\WindowsPowerShell\v1.0\powershell.exe
+    RunCount       : 0
+    LastRun        :
+
+    User           : Contoso\J.Smith
+    ExecutionType  : Direct
+    ItemName       : C:\WINDOWS\system32\mspaint.exe
+    RunCount       : 2
+    LastRun        : 4/12/2024 1:19:41 PM
+```
+  
+## Get-ExplorerHistory  
+Function to parse the WordWheelQuery registry key for entries related to searches performed in Explorer.  
+```Powershell
+PS> Get-ExplorerHistory
+    User              Order Name SearchTerm
+    ----              ----- ---- ----------
+    Contoso\J.Smith     0    0   password vault
+    Contoso\J.Smith     1   88   waffles
+    Contoso\J.Smith     2   87   bodettc
+    Contoso\J.Smith     3   86   uninstall
+    Contoso\J.Smith     4   48   treesize
+    Contoso\J.Smith     5   57   password
+```  
+  
 ## Show-SecureString
 A quick function to convert a SecureString object in to plaintext
 ```Powershell
-    PS$> $securestring = Read-Host -Prompt "type some text" -AsSecureString
-    PS$> Show-SecureString $securestring
-    secrettext
+PS> $securestring = Read-Host -Prompt "type some text" -AsSecureString
+PS> Show-SecureString $securestring
+secrettext
 ```
 ## Get-Connection
 Shows a table of all active connections, the owning process, and running user
 ```Powershell
-    PS$> Get-Connection
+    PS> Get-Connection
     
     LocalAddress  LocalPort RemoteAddress   RemotePort       State Process                        User
     ------------  --------- -------------   ----------       ----- -------                        ----
@@ -23,7 +72,7 @@ Shows a table of all active connections, the owning process, and running user
     0.0.0.0           49667 0.0.0.0                  0      Listen svchost                        NT AUTHORITY\LOCAL
     ...
 
-    PS$> Get-Connection -LocalPort 9395
+    PS> Get-Connection -LocalPort 9395
 
     LocalAddress LocalPort RemoteAddress RemotePort       State Process                User
     ------------ --------- ------------- ----------       ----- -------                ----
@@ -32,30 +81,18 @@ Shows a table of all active connections, the owning process, and running user
 ```  
 accompanying GetConnection.ps1xml file can be used to maintain the output formatting seen above.  
 ```Powershell
-PS$> Update-FormatData 'C:\Path\To\GetConnection.ps1xml'
+PS> Update-FormatData 'C:\Path\To\GetConnection.ps1xml'
 
 ```
   
 ## Get-LockEvent  
 Retrieve logs from Windows Events pertaining to computer lock and unlock.  Accompanying LockEvent.ps1xml file can be used to pretty up the PSObject output.  
 
-## ConvertTo-SarcasmFont
-This is a silly function I wrote in the middle of an awful meeting to make a coworker laugh.
-
-```Powershell
-PS$> ConvertTo-SarcasmFont "I'm really interested in what you have to say"
-```
-Now it's on your clipboard, paste and enjoy
-```
-i'm rEaLlY InTeReStEd iN WhAt yOu hAvE To sAy
-```
-Or pass the "-output" parameter to have it output to the console instead of going to the clipboard.
-
 ## Get-ComputerUpTime  
 Only tested in one Active Directory environment and a personal machine.  Function returns the current, or remote, computer's uptime as well as some other information.  
   
 ```Powershell  
-PS$> Get-ComputerUpTime  
+PS> Get-ComputerUpTime  
   
 Computer    : Win10-05ERJJ4
 Windows     : Microsoft Windows 10 Pro
@@ -69,7 +106,7 @@ InstallDate : 3/6/2021 8:00:56 PM
 A Powershell wrapper for quser to provide object output.  
   
 ```Powershell
-PS$> Invoke-Quser  
+PS> Invoke-Quser  
   
 ComputerName : Localhost
 Username     : John Doe
@@ -79,7 +116,7 @@ State        : Active
 IdleTime     : none
 LogonTime    : 7/7/2022 9:03:00 AM  
   
-PS$> Invoke-Quser -ComputerName ContosoPC1  
+PS> Invoke-Quser -ComputerName ContosoPC1  
   
 ComputerName : ContosoPC1
 Username     : CerealKiller
@@ -94,13 +131,13 @@ LogonTime    : 7/6/2022 9:03:00 PM
 A function wrapper for the .NET GeoCoordinateWatcher class.  Returns GPS coordinates derived from the Location Services of the computer.  
 Remote computer inspection leverages Invoke-Command and requires WinRM to be working. 
 ```Powershell
-PS$> Get-GeoLocation 
+PS> Get-GeoLocation 
   
 Computer Location               NetAdapter
 -------- --------               ----------
 Gibson   37.232885, -115.806122 Ethernet 2 
   
-PS$> Get-GeoLocation  -ComputerName ContosoPC1  
+PS> Get-GeoLocation  -ComputerName ContosoPC1  
   
 Computer   Location               NetAdapter
 --------   --------               ----------
