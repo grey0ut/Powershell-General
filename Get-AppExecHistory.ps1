@@ -182,45 +182,49 @@ function Get-AppExecHistory {
 
     foreach ($SID in $SIDs) {
         $UserAssistPath = Join-Path -Path $RegRoot -ChildPath $($SID + "\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\")
-        $GUIDKeys = Get-ChildItem -Path $UserAssistPath
         $UserName = Get-UsernameFromSID -SID $SID
-        $UserProfilePath = (Get-CimInstance -Class Win32_UserProfile | Where-Object {$_.SID -eq $SID}).LocalPath
-        foreach ($GUIDKey in $GUIDKeys) {
-            $GUIDName = Split-Path -Leaf $GUIDKey.Name
-            $CountPath = Join-Path -Path $GUIDKey.PSPath -ChildPath "Count"
-            if (Test-Path $CountPath) {
-                $Entries = Get-ItemProperty -Path $CountPath
-                foreach ($Entry in $Entries.PSObject.Properties) {
-                    if ($Entry.Name -notmatch '^PS') {
-                        $DecodedName = Convert-Rot13 -String $Entry.Name
+        if (Test-Path $UserAssistPath) {
+            $GUIDKeys = Get-ChildItem -Path $UserAssistPath
+            $UserProfilePath = (Get-CimInstance -Class Win32_UserProfile | Where-Object {$_.SID -eq $SID}).LocalPath
+            foreach ($GUIDKey in $GUIDKeys) {
+                $GUIDName = Split-Path -Leaf $GUIDKey.Name
+                $CountPath = Join-Path -Path $GUIDKey.PSPath -ChildPath "Count"
+                if (Test-Path $CountPath) {
+                    $Entries = Get-ItemProperty -Path $CountPath
+                    foreach ($Entry in $Entries.PSObject.Properties) {
+                        if ($Entry.Name -notmatch '^PS') {
+                            $DecodedName = Convert-Rot13 -String $Entry.Name
 
-                        if ($Entry.Value -is [Byte[]]) {
-                            $FileTime = switch ($Entry.Value.Count) {
-                                        8 { $null }
-                                        16 { [BitConverter]::ToInt64($Entry.Value, 8) }
-                                        default { [BitConverter]::ToInt64($Entry.Value, 60) }
-                                    }
-                            if ($FileTime -gt 0) {
-                                $LastRun = [DateTime]::FromFileTime($FileTime)
-                            } else {
-                                $LastRun = $null
+                            if ($Entry.Value -is [Byte[]]) {
+                                $FileTime = switch ($Entry.Value.Count) {
+                                            8 { $null }
+                                            16 { [BitConverter]::ToInt64($Entry.Value, 8) }
+                                            default { [BitConverter]::ToInt64($Entry.Value, 60) }
+                                        }
+                                if ($FileTime -gt 0) {
+                                    $LastRun = [DateTime]::FromFileTime($FileTime)
+                                } else {
+                                    $LastRun = $null
+                                }
+                                $RunCount = [BitConverter]::ToInt32($Entry.Value, 4)
                             }
-                            $RunCount = [BitConverter]::ToInt32($Entry.Value, 4)
                         }
-                    }
-                    $ResolvedGUID = Expand-GUID -Path $DecodedName
-                    $FinalPath = Expand-EnvironmentVariables -Path $ResolvedGUID -UserProfilePath $UserProfilePath
+                        $ResolvedGUID = Expand-GUID -Path $DecodedName
+                        $FinalPath = Expand-EnvironmentVariables -Path $ResolvedGUID -UserProfilePath $UserProfilePath
 
 
-                    [PSCustomObject]@{
-                        User = $UserName
-                        ExecutionType = Get-ExecutionType -GuidKey $GUIDName
-                        ItemName = $FinalPath
-                        RunCount = $RunCount
-                        LastRun = $LastRun
+                        [PSCustomObject]@{
+                            User = $UserName
+                            ExecutionType = Get-ExecutionType -GuidKey $GUIDName
+                            ItemName = $FinalPath
+                            RunCount = $RunCount
+                            LastRun = $LastRun
+                        }
                     }
                 }
             }
+        } else {
+            Write-Warning "No UserAssist key found for user: $UserName"
         }
     }
 }
