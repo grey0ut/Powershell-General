@@ -1,4 +1,4 @@
-Function Get-GeoLocation {
+function Get-GeoLocation {
     <#
     .Synopsis
     Returns GPS coordinates returned from the .NET GeoCoordinateWatcher
@@ -14,7 +14,7 @@ Function Get-GeoLocation {
     .Example
     PS> Get-GeoLocation -Verbose
     VERBOSE: Local machine allows for location services
-    VERBOSE: Starting GeoCoordinateWatcher    
+    VERBOSE: Starting GeoCoordinateWatcher
     VERBOSE: [0] Waiting 2 seconds for results
     VERBOSE: [1] Waiting 2 seconds for results
     VERBOSE: [2] Waiting 2 seconds for results
@@ -24,16 +24,16 @@ Function Get-GeoLocation {
     PS> Get-GeoLocation -ComputerName PC_2044
     37.232885, -115.806122
 
-    Same thing as executing locally. Returns GPS coordinates. 
+    Same thing as executing locally. Returns GPS coordinates.
     .NOTES
     Author: C. Bodett
-    Date: 10/20/2022
-    Version: 1.0
+    Date: 5/30/2025
+    Version: 1.1
     #>
     [Cmdletbinding()]
     Param (
-        [Parameter(Mandatory = $false, Position = 0)]
-        [String]$ComputerName
+        [Parameter(Mandatory=$false,Position=0,ValueFromPipeline)]
+        [String[]]$ComputerName
     )
 
     Begin {
@@ -42,7 +42,7 @@ Function Get-GeoLocation {
             Param(
                 $VerbosePreference
             )
-            $IsAdmin = (Get-LocalGroupMember -Group "Administrators").SID.Value -contains ([Security.Principal.WindowsIdentity]::GetCurrent().User.Value)
+            $IsAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
             $RegPath = "Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location\"
             $CompValue = Get-ItemProperty ("HKLM:\" + $RegPath) -Name "Value" | Select-Object -ExpandProperty Value
 
@@ -68,18 +68,23 @@ Function Get-GeoLocation {
                     Set-ItemProperty ("HKCU:\" + $RegPath) -Name "Value" -Value "Allow"
                 }
                 Add-Type -AssemblyName System.Device
-                $GeoWatcher = New-Object System.Device.Location.GeoCoordinateWatcher(1)
+                $GeoWatcher = [System.Device.Location.GeoCoordinateWatcher]::new(1)
                 Write-Verbose "Starting GeoCoordinateWatcher"
-                $GeoWatcher.Start()
+                [Void]$GeoWatcher.TryStart($false, [TimeSpan]::FromMilliseconds(1000))
                 $C = 0
-                while (($GeoWatcher.Status -ne 'Ready') -and ($Geowatcher.Permission -ne 'Denied') -and ($C -le 15)) {
+                while (($GeoWatcher.Status -ne 'Ready') -and ($Geowatcher.Permission -ne 'Denied') -and ($C -le 5)) {
                     Write-Verbose "[$C] Waiting 2 seconds for results"
                     Start-Sleep -Seconds 2
                     $C++
                 }
-                # need to wait a little longer to allow for more accurate data. 
-                Start-Sleep -Seconds 2
+                # need to wait a little longer to allow for more accurate data.
+                Start-Sleep -Seconds 1
                 $Location = ($GeoWatcher.Position.Location).ToString()
+                $Accuracy = if ([Double]::IsNaN($GeoWatcher.Position.Location.HorizontalAccuracy)) {
+                    $null
+                } else {
+                    '{0:n0}M' -f $GeoWatcher.Position.Location.HorizontalAccuracy
+                }
                 $GeoWatcher.Dispose()
                 if ($UserValue -eq "Deny") {
                     Write-Verbose "Updating registry for current user to revert changes"
@@ -93,17 +98,19 @@ Function Get-GeoLocation {
             [PSCustomObject]@{
                 Computer = $Env:COMPUTERNAME
                 Location = $Location
+                Accuracy = $Accuracy
                 NetAdapter = (Get-NetAdapter -Physical | Where-Object {$_.Status -eq "Up"} | Select-Object -ExpandProperty Name) -Join ','
             }
         }
     }
 
     Process {
-        if ($ComputerName) {
-            Invoke-Command -ComputerName $ComputerName -ScriptBlock $GeoCode -ArgumentList $VerbosePreference | Select-Object -Property Computer,Location,NetAdapter
-        } else {
-            Invoke-Command -ScriptBlock $GeoCode
+        foreach ($Computer in $ComputerName) {
+            if ($Computer) {
+                Invoke-Command -ComputerName $Computer -ScriptBlock $GeoCode -ArgumentList $VerbosePreference | Select-Object -Property Computer,Location,Accuracy,NetAdapter
+            } else {
+                Invoke-Command -ScriptBlock $GeoCode -ArgumentList $VerbosePreference
+            }
         }
     }
 }
-
