@@ -31,12 +31,12 @@ function Get-GeoLocation {
     Version: 1.1
     #>
     [Cmdletbinding()]
-    Param (
+    param (
         [Parameter(Mandatory=$false,Position=0,ValueFromPipeline)]
         [String[]]$ComputerName
     )
 
-    Begin {
+    begin {
         $GeoCode = {
             [cmdletbinding()]
             Param(
@@ -104,13 +104,13 @@ function Get-GeoLocation {
         }
     }
 
-    Process {
-        foreach ($Computer in $ComputerName) {
-            if ($Computer) {
-                Invoke-Command -ComputerName $Computer -ScriptBlock $GeoCode -ArgumentList $VerbosePreference | Select-Object -Property Computer,Location,Accuracy,NetAdapter
-            } else {
+    process {
+		if ($ComputerName) {
+			foreach ($Computer in $ComputerName) {
+				Invoke-Command -ComputerName $Computer -ScriptBlock $GeoCode -ArgumentList $VerbosePreference | Select-Object -Property Computer,Location,Accuracy,NetAdapter
+			}
+		} else {
                 Invoke-Command -ScriptBlock $GeoCode -ArgumentList $VerbosePreference
-            }
         }
     }
 }
