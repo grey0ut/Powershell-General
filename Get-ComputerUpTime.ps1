@@ -39,14 +39,14 @@ function Get-ComputerUpTime {
     Purpose/Change: Added in support for if the WinRM service isn't running on a remote computer
     #>
     [Cmdletbinding(DefaultParameterSetName="none")]
-    Param (
+    param (
         [Parameter(ParameterSetName="Remote",Mandatory=$true,ValueFromPipeline=$true,Position=0)]
         [String]$ComputerName,
         [Parameter(ParameterSetName="Remote",Mandatory=$false,Position=1)]
         [pscredential]$Credential
     )
 
-    Begin {
+    begin {
         $CimInstanceArgs = @{
             ClassName = "Win32_OperatingSystem"
             Property = @("InstallDate","LastBootupTime","Caption","Version","CSName")
@@ -54,7 +54,7 @@ function Get-ComputerUpTime {
         $CimSessionOption = New-CimSessionOption -Protocol Dcom
     }
 
-    Process {
+    process {
         $CimSessionArgs = @{
             SessionOption = $CimSessionOption
         }
@@ -68,9 +68,9 @@ function Get-ComputerUpTime {
         if ($Credential) {
             [Void]$CimSessionArgs.Add('Credential',$Credential)
         }
-        Try {
+        try {
             if ($c -eq 2) {
-                Write-Verbose "Trying to connect to $ComputerName via CIM one last time."
+                Write-Verbose "trying to connect to $ComputerName via CIM one last time."
             }
             $CimSession = New-CimSession @CimSessionArgs -ErrorAction Stop
             $OSInfo = Get-CimInstance @CimInstanceArgs -CimSession $CimSession -ErrorAction Stop
@@ -82,15 +82,15 @@ function Get-ComputerUpTime {
                 Uptime = '{0:dd}D:{0:hh}H:{0:mm}M:{0:ss}S' -f $((Get-Date) - $OSinfo.LastBootUpTime)
                 InstallDate = $OSInfo.InstallDate
             }
-        } Catch [Microsoft.Management.Infrastructure.CimException] {
+        } catch [Microsoft.Management.Infrastructure.CimException] {
             Write-Warning "WinRM not reachable on $ComputerName"
-        } Catch {
+        } catch {
             Write-Error $_
         }
 
-        Try {
+        try {
             Remove-CimSession -CimSession $CimSession -ErrorAction Stop
-        } Catch {
+        } catch {
             # suppress error output
         }
     }
