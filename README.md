@@ -84,6 +84,18 @@ accompanying GetConnection.ps1xml file can be used to maintain the output format
 PS> Update-FormatData 'C:\Path\To\GetConnection.ps1xml'
 
 ```
+## Get-DNSFailures
+Searches Event Logs for ID 1014 representing a failure of a DNS lookup.  Can be helpful for finding DNS timeouts.
+```Powershell
+PS> Get-DNSFailures -OutputType PSObject -Timeframe All
+    DateTime          QueryName                       ClientPID
+    --------          ---------                       ---------
+    03/31/26 12:00:37 www.youtube.com                 9892
+    03/26/26 08:43:00 t-s2-ring.msedge.net            3476
+    03/24/26 12:00:32 rr1.sn-o097znsr.googlevideo.com 23548
+    03/09/26 13:47:27 www.youtube.com                 21452
+    03/09/26 09:59:41 t-s2-ring.msedge.net            21452
+```
 
 ## Get-LockEvent
 Retrieve logs from Windows Events pertaining to computer lock and unlock.  Accompanying LockEvent.ps1xml file can be used to pretty up the PSObject output.
@@ -182,8 +194,8 @@ function tests a PSCredential object against an Active Directory domain to see i
 ## Test-Password
 function for testing a provided password against the HaveIBeenPwned API to test for credential leakage.
 
-## Test-Port
-a simple wrapper for Test-NetConnection to simplify use and output
+## Test-TCPPort
+A wrapper for a .Net tcp socket to quickly test if ports are open or not.
 
 ## Test-HostsFile
 function for testing a Windows' Hosts file to see if it's been altered from its default state.
