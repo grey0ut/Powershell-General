@@ -29,10 +29,10 @@ Function Invoke-Quser {
     LogonTime    : 3/17/2025 1:27:00 AM
     ComputerName : Server1
     .Notes
-    Version:        2.0
+    Version:        2.1
     Author:         C. Bodett
     Creation Date:  10/28/2026
-    Purpose/Change: complete rewrite with new quser parsing method, idle time conversion and general cleanup
+    Purpose/Change: fix issue with empty session names
     #>
     [cmdletbinding()]
     Param (
@@ -66,7 +66,7 @@ Function Invoke-Quser {
             "LogonTime",
             "ComputerName"
         )
-        $QuserObjs = $Results -split "\n" -replace '\s{2,}', ';' -replace '>', '' | Select-Object -Skip 1 | ConvertFrom-Csv -Delimiter ';' -Header $Header
+        $QuserObjs = $Results -split "\n" -replace '\s{2,18}', ';' -replace '>', '' | Select-Object -Skip 1 | ConvertFrom-Csv -Delimiter ';' -Header $Header
         Foreach ($Result in $QuserObjs) {
             $IdleTime = if ($Result.IdleTime -eq "none" -or $Result.IdleTime -eq '.') {
                     [timespan]::zero
