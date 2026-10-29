@@ -11,16 +11,28 @@ Function Invoke-Quser {
     .EXAMPLE
     PS C:\> Invoke-Quser
 
-    Username    : John123
-    SessionID   : 1
-    SessionName : Console
-    State       : Active
-    LogonTime   : 2/17/2022 8:27:00 AM
+    Username     : John123
+    SessionID    : 1
+    SessionName  : Console
+    State        : Active
+    Idletime     : 00:00:00
+    LogonTime    : 2/17/2022 8:27:00 AM
+    ComputerName : computer123
+    .EXAMPLE
+    PS C:\> Invoke-Quser -ComputerName Server1
+
+    Username     : jsmith
+    SessionID    : 1
+    SessionName  : rdp-tcp#0
+    State        : Active
+    IdleTime     : 02:49:00
+    LogonTime    : 3/17/2025 1:27:00 AM
+    ComputerName : Server1
     .Notes
-    Version:        1.4
+    Version:        2.0
     Author:         C. Bodett
-    Creation Date:  1/8/2025
-    Purpose/Change: Updated error handling to support multiple error messages from quser
+    Creation Date:  10/28/2026
+    Purpose/Change: complete rewrite with new quser parsing method, idle time conversion and general cleanup
     #>
     [cmdletbinding()]
     Param (
@@ -45,34 +57,41 @@ Function Invoke-Quser {
     }
 
     if ($LASTEXITCODE -eq 0) {
-        $QUserOutput = Foreach ($Result in ($Results | Select-Object -Skip 1)) {
-                        $ParsedLine = $Result -split '\s{2,}'
-                        [System.Collections.Generic.List[String]]$SessionInfo = $ParsedLine | Select-Object -Skip 1
-                        if ($SessionInfo.Count -eq 4) {
-                            # session name is blank. adding a blank entry to the array
-                            $SessionInfo.Insert(0,'')
+        $Header = @(
+            "Username",
+            "SessionName",
+            "SessionID",
+            "State",
+            "IdleTime",
+            "LogonTime",
+            "ComputerName"
+        )
+        $QuserObjs = $Results -split "\n" -replace '\s{2,}', ';' -replace '>', '' | Select-Object -Skip 1 | ConvertFrom-Csv -Delimiter ';' -Header $Header
+        Foreach ($Result in $QuserObjs) {
+            $IdleTime = if ($Result.IdleTime -eq "none" -or $Result.IdleTime -eq '.') {
+                    [timespan]::zero
+                } else {
+                    switch -regex ($Result.IdleTime) {
+                        '^(?<d>\d+)\+(?<h>\d+):(?<m>\d+)$' {
+                            # Format: D+H:MM -- e.g., "1+08:15"
+                            [TimeSpan]::new([int]$Matches['d'], [int]$Matches['h'], [int]$Matches['m'], 0)
                         }
-                        $IdleTime = if ($SessionInfo[3] -eq "none" -or $SessionInfo[3] -eq '.') {
-                                "none"
-                            } else {
-                                If ($SessionInfo[3] -as [Int]) {
-                                    $SessionInfo[3] = "0:$($SessionInfo[3])"
-                                }
-                                [Timespan]$QuserIdle = $SessionInfo[3].Replace('+','.')
-                                $QuserIdle
-                            }
-                        $UserInfo = [PSCustomObject]@{
-                            ComputerName = $ComputerName
-                            Username = $ParsedLine[0].TrimStart('>').Trim()
-                            SessionID = [Int]$SessionInfo[1]
-                            SessionName = $SessionInfo[0]
-                            State = $SessionInfo[2]
-                            IdleTime = $IdleTime
-                            LogonTime = Get-Date $SessionInfo[4]
+                        '^(?<h>\d+):(?<m>\d+)$' {
+                            # Format: H:MM -- e.g., "8:05"
+                            [TimeSpan]::new([int]$Matches['h'], [int]$Matches['m'], 0)
                         }
-                        $UserInfo
+                        '^\d+$' {
+                            # Format: minutes only -- e.g., "5"
+                            [TimeSpan]::FromMinutes([int]$Result.IdleTime)
+                        }
                     }
-        return $QUserOutput
+                }
+            $Result.IdleTime = $IdleTime
+            $Result.LogonTime = Get-Date $Result.LogonTime
+            $Result.ComputerName = $ComputerName
+            $Result.SessionID = [Int]$Result.SessionID
+            $Result
+        }
     } else {
         foreach ($ResultError in $Results.Exception.Message) {
             if ($ResultError -ne '') {
